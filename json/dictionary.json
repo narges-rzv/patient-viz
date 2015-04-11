@@ -15602,8 +15602,8 @@
       "name": "nitroglycerin"
     }, 
     "636292962": {
-      "desc": "Hydrocodone Bitartate and Homatropine Methylbromide [Hydrocodone Bitartate and Homatropine Methylbromide HUMAN PRESCRIPTION DRUG] (Hydromet) HOMATROPINE METHYLBROMIDE; HYDROCODONE BITARTRATE - Opioid Agonist [EPC],Opioid Agonists [MoA] - HUMAN PRESCRIPTION DRUG", 
-      "name": "Hydrocodone Bitartate and Homatropine Methylbromide", 
+      "desc": "prescribed 636292962", 
+      "name": "636292962", 
       "parent": "", 
       "id": "636292962"
     }, 
@@ -19754,8 +19754,8 @@
       "desc": "prescribed 003085150"
     }, 
     "63629296202": {
-      "desc": "Hydrocodone Bitartate and Homatropine Methylbromide [240 mL in 1 BOTTLE (63629-2962-2)] (Hydromet) HOMATROPINE METHYLBROMIDE; HYDROCODONE BITARTRATE - Opioid Agonist [EPC],Opioid Agonists [MoA] - HUMAN PRESCRIPTION DRUG", 
-      "name": "Hydrocodone Bitartate and Homatropine Methylbromide", 
+      "desc": "prescribed 63629296202", 
+      "name": "63629296202", 
       "parent": "636292962", 
       "id": "63629296202"
     }, 

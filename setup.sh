@@ -342,6 +342,17 @@ fetch_icd9() {
     cd "${ICD9_DIR}"
     echo "downloading ICD9 definitions"
     curl -# -o "ucod.txt" "${ICD9_URL}"
+    # temporary quick fix for encoding issues
+    grep 386.0 ucod.txt | hexdump | grep 82 > /dev/null
+    if [ $? -eq 0 ]; then
+      echo "fixing encoding issues"
+      iconv -f ibm437 -t utf-8 ucod.txt > ucod2.txt
+      test_fail $?
+      mv ucod.txt ucod_old.txt
+      test_fail $?
+      mv ucod2.txt ucod.txt
+      test_fail $?
+    fi
     cd_back
   fi
 }

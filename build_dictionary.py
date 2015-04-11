@@ -17,7 +17,9 @@ import csv
 import json
 import os.path
 
-reportMissingEntries = True
+import util
+
+reportMissingEntries = False # only for debugging
 
 def toEntry(id, pid, name, desc):
     return {
@@ -202,7 +204,7 @@ def initProcedure():
 
 ### unknown ###
 
-def createUnknownEntry(_, type, id, pid):
+def createUnknownEntry(_, type, id, pid = ""):
     if reportMissingEntries:
         print("unknown entry; type: " + type + " id: " + id, file=sys.stderr)
     return toEntry(id, pid, id, type + " " + id)
@@ -346,7 +348,7 @@ def extractEntries(dict, patient):
 
 def loadOldDict(file):
     dict = {}
-    if file == sys.stdout or not os.path.isfile(file):
+    if file == '-' or not os.path.isfile(file):
         return dict
     with open(file, 'r') as input:
         dict = json.loads(input.read())
@@ -360,11 +362,8 @@ def enrichDict(file, mid):
         with open(mid, 'r') as pfile:
             patient = json.loads(pfile.read())
     extractEntries(dict, patient)
-    if file == sys.stdout:
-        print(json.dumps(dict, indent=2), file=file)
-    else:
-        with open(file, 'w') as output:
-            print(json.dumps(dict, indent=2), file=output)
+    with util.OutWrapper(file) as out:
+        print(json.dumps(dict, indent=2), file=out)
 
 ### argument API
 
@@ -409,7 +408,7 @@ def usage():
     print("-p <file>: specify patient json file. '-' uses standard in", file=sys.stderr)
     print("-c <config>: specify config file. '-' uses default settings", file=sys.stderr)
     print("-o <output>: specify output file. '-' uses standard out", file=sys.stderr)
-    print("--lookup <id...>: lookup mode. translates ids in shorthand notation '${group_id}__${type_id}'", file=sys.stderr)
+    print("--lookup <id...>: lookup mode. translates ids in shorthand notation '${group_id}__${type_id}'. '-' uses standard in with ids separated by spaces", file=sys.stderr)
     print("-h|--help: prints this help.", file=sys.stderr)
     sys.exit(1)
 
@@ -424,7 +423,7 @@ def interpretArgs():
     }
     info = {
         'mid': globalMid,
-        'output': sys.stdout
+        'output': '-'
     }
     lookupMode = False
     args = sys.argv[:]
@@ -448,8 +447,6 @@ def interpretArgs():
                 print('-o requires argument', file=sys.stderr)
                 usage()
             info['output'] = args.pop(0)
-            if info['output'] == '-':
-                info['output'] = sys.stdout
         elif val == '--lookup':
             lookupMode = True
             break
@@ -469,17 +466,24 @@ if __name__ == '__main__':
     init()
     if lookupMode:
         dict = {}
-        for e in rest:
+
+        def addEntry(e):
             spl = e.split('__', 1)
             if len(spl) != 2:
                 print("shorthand format is '${group_id}__${type_id}': " + e, file=sys.stderr)
                 sys.exit(1)
             createEntry(dict, spl[0].strip(), spl[1].strip())
+
+        for e in rest:
+            if e == "-":
+                for eid in sys.stdin.read().split(" "):
+                    if len(eid) > 0 and eid != "id" and eid != "outcome" and eid != "test":
+                        addEntry(eid)
+            else:
+                addEntry(e)
+
         file = info['output']
-        if file == sys.stdout:
-            print(json.dumps(dict, indent=2), file=file)
-        else:
-            with open(file, 'w') as output:
-                print(json.dumps(dict, indent=2), file=output)
+        with util.OutWrapper(file) as out:
+            print(json.dumps(dict, indent=2), file=out)
     else:
         enrichDict(info['output'], info['mid'])
